@@ -1,17 +1,14 @@
 service: workshop-${self:custom.name}
 
 custom:
-
   name: michael
   email: michaeltichopad01@gmail.com
 
 plugins:
-
   - serverless-export-env
   - serverless-pseudo-parameters
 
 provider:
-
   name: aws
   runtime: nodejs12.x
   iamRoleStatements:
@@ -23,7 +20,6 @@ provider:
       Resource: arn:aws:execute-api:#{AWS::Region}:#{AWS::AccountId}:#{ApiGatewayRestApi}/${self:provider.stage}/GET/restaurants
 
 functions:
-
   get-index:
     handler: functions/get-index.handler
     events:
@@ -32,6 +28,8 @@ functions:
           method: get
     environment:
       restaurants_api: https://#{ApiGatewayRestApi}.execute-api.#{AWS::Region}.amazonaws.com/${self:provider.stage}/restaurants
+      cognito_user_pool_id: !Ref CognitoUserPool
+      cognito_client_id: !Ref WebCognitoUserPoolClient
 
   get-restaurants:
     handler: functions/get-restaurants.handler
@@ -49,13 +47,15 @@ functions:
       - http:
           path: /restaurants/search
           method: post
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
     environment:
       restaurants_table: !Ref RestaurantsTable
 
 resources:
-
   Resources:
-
     RestaurantsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -124,7 +124,6 @@ resources:
         PreventUserExistenceErrors: ENABLED
 
   Outputs:
-
     RestaurantsTableName:
       Value: !Ref RestaurantsTable
 

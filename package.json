@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "sls": "serverless"
+    "sls": "AWS_PROFILE=workshop serverless"
   },
   "keywords": [],
   "author": "",
